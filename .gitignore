@@ -1,0 +1,17 @@
+# Go
+.air-tmp/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# Editors and scratch files
+.idea/
+.DS_Store
+arch.excalidraw
+
+# Secrets — the agent reads OPEN_API_KEY from the environment
+.env
+.env.local

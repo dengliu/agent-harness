@@ -1,0 +1,5 @@
+# Nothing is built into an image here, but keep these out of any context anyway.
+.air-tmp
+web/node_modules
+web/.next
+web/out

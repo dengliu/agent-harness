@@ -1,0 +1,28 @@
+# air-verse/air — rebuild and restart the agent when a .go file changes.
+# https://github.com/air-verse/air
+
+root = "."
+tmp_dir = ".air-tmp"
+
+[build]
+  cmd = "go build -o ./.air-tmp/agent ."
+  bin = "./.air-tmp/agent"
+  # Listen on every interface: the port is published out of the container.
+  full_bin = "./.air-tmp/agent -addr :8080"
+  include_ext = ["go", "mod", "sum"]
+  exclude_dir = [".air-tmp", "web", "node_modules", ".git", ".idea"]
+  exclude_regex = ["_test\\.go"]
+  delay = 300
+  stop_on_error = false
+  send_interrupt = true          # let the server drain its SSE streams
+  kill_delay = "2s"
+  # Bind mounts on macOS and Windows do not deliver inotify events into Linux
+  # containers, so watch by polling instead of missing every edit.
+  poll = true
+  poll_interval = 500
+
+[log]
+  time = true
+
+[misc]
+  clean_on_exit = true

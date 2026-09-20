@@ -1,0 +1,68 @@
+# Development stack: the Go agent and the Next.js UI, both running straight from
+# the working tree. Neither service builds an image — the code is bind-mounted
+# into a stock language image and executed there, so an edit on the host is a
+# reload in the container with no rebuild step in between.
+#
+#   export OPEN_API_KEY=...   (or put it in .env next to this file)
+#   make up
+
+services:
+  agent:
+    image: golang:1.26-alpine
+    working_dir: /app
+    command: >
+      sh -c '
+        command -v air >/dev/null 2>&1 || go install github.com/air-verse/air@latest;
+        exec air -c .air.toml
+      '
+    environment:
+      OPEN_API_KEY: ${OPEN_API_KEY:?set OPEN_API_KEY in your shell or in a .env file}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      # Keep the module cache and the air binary in the named volume below.
+      GOPATH: /go
+      GOFLAGS: -buildvcs=false
+      CGO_ENABLED: "0"
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app                 # the source, live
+      - go-cache:/go           # module cache + `go install` output, across restarts
+      - go-build-cache:/root/.cache/go-build
+    healthcheck:
+      # Waiting on the API means `depends_on` holds the UI back until the first
+      # air build has actually finished, not just until the container exists.
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 90s        # the first run compiles air itself
+
+  web:
+    image: node:24-alpine
+    working_dir: /app
+    command: >
+      sh -c '
+        [ -d node_modules/next ] || npm install --no-audit --no-fund;
+        exec npm run dev -- --hostname 0.0.0.0
+      '
+    environment:
+      # next.config.mjs reads this to rewrite /api/* to the Go service.
+      AGENT_API: http://agent:8080
+      WATCHPACK_POLLING: "true"   # bind mounts on macOS do not deliver inotify events
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      # node_modules and .next stay in the container: the host's copies are
+      # built for darwin, and Next's native binaries are platform-specific.
+      - web-node-modules:/app/node_modules
+      - web-next-cache:/app/.next
+    depends_on:
+      agent:
+        condition: service_healthy
+
+volumes:
+  go-cache:
+  go-build-cache:
+  web-node-modules:
+  web-next-cache:

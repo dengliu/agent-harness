@@ -1,0 +1,546 @@
+:root {
+  --bg: #0e1116;
+  --panel: #161b22;
+  --panel-2: #1c2230;
+  --line: #272e3b;
+  --text: #e6edf3;
+  --muted: #8b98a9;
+  --accent: #6ea8fe;
+  --thought: #a78bfa;
+  --action: #f0b429;
+  --ok: #4ade80;
+  --bad: #f87171;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre,
+.mono {
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.86em;
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+}
+
+/* ---------- two-column shell: tools left, conversation right ---------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 30px;
+  align-items: start;
+}
+
+.main {
+  min-width: 0; /* let long observations wrap instead of stretching the grid */
+}
+
+.sidebar {
+  position: sticky;
+  top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+
+.side-title {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.side-note {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Below this width the two columns stop fitting; the conversation comes first
+   and the tool list moves underneath it. */
+@media (max-width: 880px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    order: 2;
+    max-height: none;
+  }
+
+  .main {
+    order: 1;
+  }
+
+  .tool-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+/* ---------- header ---------- */
+
+header.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+header.masthead h1 {
+  font-size: 20px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+header.masthead .sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pill {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+/* ---------- ask box ---------- */
+
+form.ask {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+form.ask textarea {
+  flex: 1;
+  resize: vertical;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+
+form.ask textarea:focus {
+  border-color: var(--accent);
+}
+
+button {
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #0b1020;
+  font: inherit;
+  font-weight: 600;
+  padding: 0 18px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+  font-weight: 500;
+  padding: 6px 12px;
+}
+
+/* ---------- examples & tools ---------- */
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.examples button {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 13px;
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+
+.examples button:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.tool {
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 9px 11px;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+/* A tool the agent has reached for during this run. */
+.tool.used {
+  border-left-color: var(--action);
+  background: var(--panel-2);
+}
+
+.tool-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tool .name {
+  color: var(--action);
+  font-weight: 600;
+}
+
+.tool .uses {
+  color: var(--action);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tool .desc {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.4;
+  margin: 3px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- trace ---------- */
+
+.trace {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* A step is the interpreted reasoning, then the exchange that produced it in a
+   full-width section underneath. The exchange used to sit in a right-hand
+   column, which meant a 4 kB prompt had 260px to live in. */
+.step {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.step-main {
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  padding: 11px 14px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- per-step exchange with the model ---------- */
+
+.step-trace {
+  border-top: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.trace-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 14px;
+}
+
+.step-trace.open .trace-head {
+  padding-bottom: 4px;
+}
+
+/* The fold control owns the whole section; the tabs choose what it shows. */
+.trace-fold {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.trace-fold:hover {
+  color: var(--text);
+}
+
+.trace-fold .caret {
+  font-size: 9px;
+}
+
+.trace-head .tab {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.trace-head .tab:first-of-type {
+  margin-left: 6px;
+}
+
+.trace-head .tab:hover {
+  opacity: 0.9;
+  color: var(--text);
+}
+
+.trace-head .tab.on {
+  opacity: 1;
+  color: var(--text);
+  box-shadow: inset 0 -1px 0 var(--accent);
+}
+
+.trace-head .trace-cost {
+  margin-left: auto;
+}
+
+.trace-cost {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10.5px;
+  color: var(--muted);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.trace-raw {
+  margin: 0;
+  padding: 2px 14px 12px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  /* A long request scrolls inside the step rather than burying the answer. */
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.tool-ms {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
+/* The trace column has no room to be a column on a narrow screen: put it under
+   the reasoning it explains. */
+.label {
+  flex: 0 0 96px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 2px;
+}
+
+.label.thought {
+  color: var(--thought);
+}
+
+.label.action {
+  color: var(--action);
+}
+
+.label.ok {
+  color: var(--ok);
+}
+
+.label.bad {
+  color: var(--bad);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.body.obs {
+  color: var(--muted);
+  background: var(--panel-2);
+  margin: -3px 0;
+  padding: 3px 0;
+}
+
+.call .tool-name {
+  color: var(--action);
+  font-weight: 600;
+}
+
+.stepno {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 8px 14px 0;
+}
+
+.question {
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 14px;
+  font-size: 16px;
+}
+
+.answer {
+  border: 1px solid var(--ok);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.07), transparent);
+  padding: 16px 18px;
+}
+
+.answer h2 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+
+.answer .text {
+  white-space: pre-wrap;
+}
+
+.error {
+  border: 1px solid var(--bad);
+  color: var(--bad);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* ---------- working indicator ---------- */
+
+.working {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+    opacity: 0.8;
+  }
+}
